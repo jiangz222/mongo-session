@@ -36,17 +36,10 @@ Replace the mgo in  [mongostore](https://github.com/kidstuff/mongostore) by [qmg
 
 # 原理
 ## 基本逻辑
-- Mongo-DB 里会存储: _id, data, modified 3个字段
-- 初次请求，会将登陆用户的定制信息存入db，具体的定制内容放到data
-- 返回响应头为： Set-Cookie: session-key=fadsifadjsifasdiofasdfads
-  - fadsifadjsifasdiofasdfads里包含了db里的_id的信息
-- 下次请求头为: Cookie: session-key=fadsifadjsifasdiofasdfads, 
-  - 从fadsifadjsifasdiofasdfads反解出_id, 然后从DB里得到data，完成验证和信息读取
-
-## 方法意义
 - `store.Get`
-  - 如果没有cookie或者cookie无效，则此方法会返回一个新的session
-  - 如果是有效的cookie，此方法会返回这个请求的session，每个请求都有独立的session，从cookie里解出_id, 然后用_id拿到db里存的data(`session.Values`)
+  - 如果请求没有cookie头或者cookie头无效(比如登陆/注册)，则此方法会返回一个新的"空的"session
+  - 如果是有效的cookie头，此方法会返回这个请求的session(每个请求都有独立的session)
+    - 方法会从cookie头里解出_id, 然后用_id拿到db里存的data, 放到这个session的Values里
 - `sessions.Save`
   - 将新的`session.Values`写入到db里的data里
   - 将_id编码到cookie头里，返回
@@ -60,5 +53,5 @@ Replace the mgo in  [mongostore](https://github.com/kidstuff/mongostore) by [qmg
   - 然后调用`store.Get`、设置`session.Values`、调用`store.Save`(Save会写cookie头)
 - 登陆后，其他的业务请求
   - 需要先调用`store.Get`，成功调用且能得到之前设置的Values，说明session有效
-  - 处理业务逻辑
   - 设置`session.Values`、调用`store.Save`(Save会写cookie头)
+  - 处理业务逻辑
