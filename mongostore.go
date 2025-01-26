@@ -47,7 +47,7 @@ func NewMongoStore(qc *qmgo.QmgoClient, maxAge int, domain string,
 		qc:    qc,
 	}
 	if len(domain) > 0 {
-	    store.Options.Domain = domain	
+		store.Options.Domain = domain
 	}
 
 	store.MaxAge(maxAge)
@@ -206,4 +206,12 @@ func (m *MongoStore) delete(session *sessions.Session) error {
 	ctx, fn := context.WithTimeout(context.Background(), 5*time.Second)
 	defer fn()
 	return m.qc.RemoveId(ctx, session.ID)
+}
+
+func (m *MongoStore) Delete(w http.ResponseWriter, session *sessions.Session) error {
+	if err := m.delete(session); err != nil {
+		return err
+	}
+	m.Token.SetToken(w, session.Name(), "", session.Options)
+	return nil
 }
