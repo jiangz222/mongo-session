@@ -212,6 +212,6 @@ func (m *MongoStore) Delete(w http.ResponseWriter, session *sessions.Session) er
 	if err := m.delete(session); err != nil {
 		return err
 	}
-	m.Token.SetToken(w, session.Name(), "", session.Options)
+	//m.Token.SetToken(w, session.Name(), "", session.Options)
 	return nil
 }
