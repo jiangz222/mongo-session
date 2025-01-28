@@ -72,6 +72,21 @@ func (m *MongoStore) Get(r *http.Request, name string) (
 	return sessions.GetRegistry(r).Get(m, name)
 }
 
+// CreateNew returns a new session for the given name without adding it to the registry.
+func (m *MongoStore) CreateNew(r *http.Request, name string) (
+	*sessions.Session, error) {
+	session := sessions.NewSession(m, name)
+	session.Options = &sessions.Options{
+		Path:     m.Options.Path,
+		MaxAge:   m.Options.MaxAge,
+		Domain:   m.Options.Domain,
+		Secure:   m.Options.Secure,
+		HttpOnly: m.Options.HttpOnly,
+	}
+	session.IsNew = true
+	return session, nil
+}
+
 // New returns a session for the given name without adding it to the registry.
 func (m *MongoStore) New(r *http.Request, name string) (
 	*sessions.Session, error) {
